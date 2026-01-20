@@ -19,88 +19,66 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
-
-export default function Sidebar() {
+export default function Sidebar({ open, setOpen }) {
   const navigate = useNavigate();
 
   return (
     <Box
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
       sx={{
-        width: 250,
+        width: open ? 250 : 60,
         height: "100vh",
         bgcolor: "#1f4d3a",
         color: "white",
         position: "fixed",
+        transition: "width 0.3s ease",
+        overflowX: "hidden",
+        zIndex: 1200,
       }}
     >
-      <Box sx={{ p: 2 }}>
-        <Typography variant="h6" fontWeight="bold">
-          Startup Hub
+      <Box sx={{ p: 2, textAlign: open ? "left" : "center" }}>
+        <Typography variant="h6" fontWeight="bold" noWrap>
+          {open ? "Startup Hub" : "SH"}
         </Typography>
       </Box>
 
       <List>
-        <MenuItem
-          icon={<DashboardIcon />}
-          text="Dashboard"
-          onClick={() => navigate("/")}
-        />
-        <MenuItem
-          icon={<AccountCircleIcon />}
-          text="Profile"
-          onClick={() => navigate("/profile")}
-        />
-        <MenuItem
-          icon={<TrendingUpIcon />}
-          text="Fundraising Tracker"
-          onClick={() => navigate("/fundraising")}
-        />
-        <MenuItem
-          icon={<GroupIcon />}
-          text="Team Management"
-          onClick={() => navigate("/team")}
-        />
-        <MenuItem
-          icon={<PeopleAltIcon />}
-          text="My Clients"
-          onClick={() => navigate("/clients")}
-        />
-        <MenuItem
-          icon={<TimelineIcon />}
-          text="Milestone Tracking"
-          onClick={() => navigate("/milestones")}
-        />
-        <MenuItem
-          icon={<BusinessIcon />}
-          text="Investor Relations"
-          onClick={() => navigate("/investors")}
-        />
-        <MenuItem
-          icon={<HelpOutlineIcon />}
-          text="Product Roadmap"
-          onClick={() => navigate("/roadmap")}
-        />
-        <MenuItem
-          icon={<GavelIcon />}
-          text="Legal Compliance"
-          onClick={() => navigate("/legal")}
-        />
+        <MenuItem open={open} icon={<DashboardIcon />} text="Dashboard" onClick={() => navigate("/")} />
+        <MenuItem open={open} icon={<AccountCircleIcon />} text="Profile" onClick={() => navigate("/profile")} />
+        <MenuItem open={open} icon={<TrendingUpIcon />} text="Fundraising Tracker" onClick={() => navigate("/fundraising")} />
+        <MenuItem open={open} icon={<GroupIcon />} text="Team Management" onClick={() => navigate("/team")} />
+        <MenuItem open={open} icon={<PeopleAltIcon />} text="My Clients" onClick={() => navigate("/clients")} />
+        <MenuItem open={open} icon={<TimelineIcon />} text="Milestone Tracking" onClick={() => navigate("/milestones")} />
+        <MenuItem open={open} icon={<BusinessIcon />} text="Investor Relations" onClick={() => navigate("/investors")} />
+        <MenuItem open={open} icon={<HelpOutlineIcon />} text="Product Roadmap" onClick={() => navigate("/roadmap")} />
+        <MenuItem open={open} icon={<GavelIcon />} text="Legal Compliance" onClick={() => navigate("/legal")} />
       </List>
 
       <Box sx={{ position: "absolute", bottom: 20, width: "100%" }}>
-        <MenuItem icon={<LogoutIcon />} text="Logout" />
+        <MenuItem open={open} icon={<LogoutIcon />} text="Logout" />
       </Box>
     </Box>
   );
 }
 
-function MenuItem({ icon, text, onClick }) {
+function MenuItem({ icon, text, onClick, open }) {
   return (
-    <ListItemButton onClick={onClick}>
-      <ListItemIcon sx={{ color: "white" }}>
+    <ListItemButton
+      onClick={onClick}
+      sx={{ justifyContent: open ? "flex-start" : "center", px: 2 }}
+    >
+      <ListItemIcon
+        sx={{
+          color: "white",
+          minWidth: 0,
+          mr: open ? 2 : "auto",
+          justifyContent: "center",
+        }}
+      >
         {icon}
       </ListItemIcon>
-      <ListItemText primary={text} />
+      {open && <ListItemText primary={text} />}
     </ListItemButton>
   );
 }
