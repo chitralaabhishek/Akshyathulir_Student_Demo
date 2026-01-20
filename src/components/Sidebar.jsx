@@ -16,7 +16,9 @@ import BusinessIcon from "@mui/icons-material/Business";
 import GavelIcon from "@mui/icons-material/Gavel";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt"; // ✅ NEW ICON
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -42,6 +44,11 @@ export default function Sidebar() {
           icon={<DashboardIcon />}
           text="Dashboard"
           onClick={() => navigate("/")}
+        />
+        <MenuItem
+          icon={<AccountCircleIcon />}
+          text="Profile"
+          onClick={() => navigate("/profile")}
         />
         <MenuItem
           icon={<TrendingUpIcon />}

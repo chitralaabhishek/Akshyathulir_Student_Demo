@@ -3,12 +3,13 @@ import DashboardLayout from "./components/DashboardLayout";
 
 import Dashboard from "./pages/Dashboard";
 import FundraisingTracker from "./pages/FundraisingTracker";
+import Profile from "./pages/Profile";
 import TeamManagement from "./pages/TeamManagement";
 import MilestoneTracking from "./pages/MilestoneTracking";
 import InvestorRelations from "./pages/InvestorRelations";
 import ProductRoadmap from "./pages/ProductRoadmap";
 import LegalCompliance from "./pages/LegalCompliance";
-import MyClients from "./pages/MyClients"; // ✅ NEW PAGE
+import MyClients from "./pages/MyClients";
 
 import { DataProvider } from "./context/DataContext";
 
@@ -41,6 +42,15 @@ function App() {
             element={
               <DashboardLayout>
                 <FundraisingTracker />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <DashboardLayout>
+                <Profile />
               </DashboardLayout>
             }
           />
