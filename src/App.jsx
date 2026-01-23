@@ -10,6 +10,8 @@ import InvestorRelations from "./pages/InvestorRelations";
 import ProductRoadmap from "./pages/ProductRoadmap";
 import LegalCompliance from "./pages/LegalCompliance";
 import MyClients from "./pages/MyClients";
+import Schemes from "./pages/Schemes";
+
 
 import { DataProvider } from "./context/DataContext";
 
@@ -100,6 +102,16 @@ function App() {
               </DashboardLayout>
             }
           />
+
+          <Route
+            path="/schemes"
+            element={
+              <DashboardLayout>
+                <Schemes />
+              </DashboardLayout>
+            }
+          />
+
         </Routes>
       </BrowserRouter>
     </DataProvider>

@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
+// ICONS
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import GroupIcon from "@mui/icons-material/Group";
@@ -19,6 +20,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import DescriptionIcon from "@mui/icons-material/Description"; // Schemes icon
 
 export default function Sidebar({ open, setOpen }) {
   const navigate = useNavigate();
@@ -33,8 +35,8 @@ export default function Sidebar({ open, setOpen }) {
         bgcolor: "#1f4d3a",
         color: "white",
         position: "fixed",
-        left: 0,
         top: 0,
+        left: 0,
         display: "flex",
         flexDirection: "column",
         transition: "width 0.25s ease",
@@ -53,16 +55,8 @@ export default function Sidebar({ open, setOpen }) {
           gap: 1.5,
         }}
       >
-        {/* LOGO ICON (always visible) */}
-        <RocketLaunchIcon
-          sx={{
-            fontSize: 32,
-            color: "white",
-            transition: "transform 0.3s ease",
-          }}
-        />
+        <RocketLaunchIcon sx={{ fontSize: 32 }} />
 
-        {/* NAME (only when open) */}
         <Typography
           variant="h6"
           fontWeight="bold"
@@ -77,14 +71,14 @@ export default function Sidebar({ open, setOpen }) {
         </Typography>
       </Box>
 
-
-      {/* MENU */}
+      {/* MENU ITEMS */}
       <List sx={{ flexGrow: 1 }}>
         <MenuItem open={open} icon={<DashboardIcon />} text="Dashboard" onClick={() => navigate("/")} />
         <MenuItem open={open} icon={<AccountCircleIcon />} text="Profile" onClick={() => navigate("/profile")} />
         <MenuItem open={open} icon={<TrendingUpIcon />} text="Fundraising Tracker" onClick={() => navigate("/fundraising")} />
         <MenuItem open={open} icon={<GroupIcon />} text="Team Management" onClick={() => navigate("/team")} />
         <MenuItem open={open} icon={<PeopleAltIcon />} text="My Clients" onClick={() => navigate("/clients")} />
+        <MenuItem open={open} icon={<DescriptionIcon />} text="Schemes" onClick={() => navigate("/schemes")} />
         <MenuItem open={open} icon={<TimelineIcon />} text="Milestone Tracking" onClick={() => navigate("/milestones")} />
         <MenuItem open={open} icon={<BusinessIcon />} text="Investor Relations" onClick={() => navigate("/investors")} />
         <MenuItem open={open} icon={<HelpOutlineIcon />} text="Product Roadmap" onClick={() => navigate("/roadmap")} />
@@ -99,6 +93,8 @@ export default function Sidebar({ open, setOpen }) {
   );
 }
 
+/* ================= MENU ITEM COMPONENT ================= */
+
 function MenuItem({ icon, text, onClick, open }) {
   return (
     <ListItemButton
@@ -108,6 +104,9 @@ function MenuItem({ icon, text, onClick, open }) {
         px: 2,
         justifyContent: open ? "flex-start" : "center",
         transition: "all 0.2s ease",
+        "&:hover": {
+          bgcolor: "rgba(255,255,255,0.1)",
+        },
       }}
     >
       <ListItemIcon
