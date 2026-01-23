@@ -148,20 +148,63 @@ function App() {
 
   // --- Handle Number of Branches ---
   const handleBranchCountChange = (e) => {
-    const count = parseInt(e.target.value) || 0;
-    const updatedFormData = { ...formData, numberOfBranches: e.target.value };
-    const validCount = count > 0 ? count : 1; 
-    const currentAddresses = [...formData.branchAddresses];
-    if (validCount > currentAddresses.length) {
-        for (let i = currentAddresses.length; i < validCount; i++) {
-            currentAddresses.push({ ...initialAddress });
-        }
-    } else if (validCount < currentAddresses.length) {
-        currentAddresses.length = validCount;
+    const value = e.target.value;
+
+    // ✅ Allow empty value (for backspace / typing)
+    if (value === "") {
+      setFormData({
+        ...formData,
+        numberOfBranches: "",
+        branchAddresses: [],
+      });
+
+      setErrors((prev) => ({
+        ...prev,
+        numberOfBranches: "Number of branches is required",
+      }));
+      return;
     }
-    updatedFormData.branchAddresses = currentAddresses;
-    setFormData(updatedFormData);
+
+    // Convert only AFTER checking empty
+    let count = Number(value);
+
+    // ❌ Invalid numbers
+    if (isNaN(count) || count < 1) {
+      return;
+    }
+
+    // ❌ Max limit = 20
+    if (count > 20) {
+      setErrors((prev) => ({
+        ...prev,
+        numberOfBranches: "Maximum allowed branches is 20",
+      }));
+      return;
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        numberOfBranches: "",
+      }));
+    }
+
+    const updatedAddresses = [...formData.branchAddresses];
+
+    if (count > updatedAddresses.length) {
+      for (let i = updatedAddresses.length; i < count; i++) {
+        updatedAddresses.push({ ...initialAddress });
+      }
+    } else if (count < updatedAddresses.length) {
+      updatedAddresses.length = count;
+    }
+
+    setFormData({
+      ...formData,
+      numberOfBranches: value, // 👈 keep as string
+      branchAddresses: updatedAddresses,
+    });
   };
+
+
 
   // --- Generic Handler for Address Fields ---
   const handleAddressFieldChange = (index, field, value) => {
@@ -267,11 +310,39 @@ function App() {
 
   // --- General Input Handler ---
   const handleInputChange = (field) => (event) => {
-    setFormData({ ...formData, [field]: event.target.value });
+    const value = event.target.value;
+
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+
+      // ===== TEAM SIZE VALIDATION =====
+      const teamSize = Number(updated.currentTeamSize || 0);
+      const male = Number(updated.maleCount || 0);
+      const female = Number(updated.femaleCount || 0);
+
+      if (teamSize > 0 && male + female > teamSize) {
+        setErrors((prevErr) => ({
+          ...prevErr,
+          maleCount: "Male + Female employees cannot exceed team size",
+          femaleCount: "Male + Female employees cannot exceed team size",
+        }));
+      } else {
+        setErrors((prevErr) => ({
+          ...prevErr,
+          maleCount: "",
+          femaleCount: "",
+        }));
+      }
+      // ===============================
+
+      return updated;
+    });
+
     if (errors[field]) {
-      setErrors({ ...errors, [field]: '' });
+      setErrors((prevErr) => ({ ...prevErr, [field]: "" }));
     }
   };
+
 
   // --- Validation ---
   const validateForm = () => {
@@ -369,59 +440,103 @@ function App() {
       </Typography>
 
       {/* Company Details */}
-      <Card sx={{ mb: 3, border: '2px solid #1f4d3a' }}>
-        <Box sx={{ backgroundColor: '#1f4d3a', color: 'white', p: 2 }}>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: '20px' }}>Company Details</Typography>
+      <Card sx={{ mb: 3, border: "2px solid #1f4d3a" }}>
+        <Box sx={{ backgroundColor: "#1f4d3a", color: "white", p: 2 }}>
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: "bold", fontSize: "20px" }}
+          >
+            Company Details
+          </Typography>
         </Box>
+
         <CardContent sx={{ p: 3 }}>
+          {/* ROW 1 */}
           <FormRow>
-            <TextField 
-              label="Startup Name *" 
-              value={formData.startupName} 
-              onChange={handleInputChange('startupName')} 
+            <TextField
+              label="Startup Name *"
+              value={formData.startupName}
+              onChange={handleInputChange("startupName")}
               error={!!errors.startupName}
               helperText={errors.startupName}
             />
-            <TextField 
-              select 
-              label="Legal Status *" 
-              value={formData.legalStatus} 
-              onChange={handleInputChange('legalStatus')}
+
+            <TextField
+              select
+              label="Legal Status *"
+              value={formData.legalStatus}
+              onChange={handleInputChange("legalStatus")}
               error={!!errors.legalStatus}
               helperText={errors.legalStatus}
             >
-                <MenuItem value="Private Limited">Private Limited</MenuItem>
-                <MenuItem value="LLP">LLP</MenuItem>
-                <MenuItem value="Partnership">Partnership</MenuItem>
-                <MenuItem value="Sole Proprietorship">Sole Proprietorship</MenuItem>
+              <MenuItem value="Private Limited">Private Limited</MenuItem>
+              <MenuItem value="LLP">LLP</MenuItem>
+              <MenuItem value="Partnership">Partnership</MenuItem>
+              <MenuItem value="Sole Proprietorship">
+                Sole Proprietorship
+              </MenuItem>
             </TextField>
-            
-            {/* --- DATE OF ESTABLISHMENT --- */}
+
+            {/* DATE OF ESTABLISHMENT */}
             <TextField
               label="Date of Establishment *"
               type="date"
               value={formData.dateOfEstablishment}
-              onChange={handleInputChange('dateOfEstablishment')}
               InputLabelProps={{ shrink: true }}
+              onChange={(e) => {
+                const selectedDate = e.target.value;
+
+                // ❌ Block future dates
+                if (selectedDate > today) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    dateOfEstablishment: "Date cannot be in the future",
+                  }));
+                  return;
+                }
+
+                // ❌ Block startups older than 2 years
+                if (selectedDate < twoYearsAgo) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    dateOfEstablishment:
+                      "Only startups established within the last 2 years are eligible",
+                  }));
+                  return;
+                }
+
+                // ✅ Valid date
+                setErrors((prev) => ({ ...prev, dateOfEstablishment: "" }));
+                setFormData((prev) => ({
+                  ...prev,
+                  dateOfEstablishment: selectedDate,
+                }));
+              }}
               error={!!errors.dateOfEstablishment}
-              helperText={errors.dateOfEstablishment || "Must be within last 2 years"}
+              helperText={
+                errors.dateOfEstablishment ||
+                `Allowed range: ${twoYearsAgo} to ${today}`
+              }
               inputProps={{
-                max: today,         // Cannot be future
-                min: twoYearsAgo    // Cannot be older than 2 years
+                min: twoYearsAgo,
+                max: today,
+                onKeyDown: (e) => e.preventDefault(), // 🚫 Prevent manual typing
               }}
             />
-            {/* -------------------------------------- */}
 
           </FormRow>
+
+          {/* ROW 2 */}
           <FormRow>
-            
             <TextField
               select
               label="Primary Sector *"
               value={formData.primarySector}
-              onChange={handleInputChange('primarySector')}
+              onChange={handleInputChange("primarySector")}
               error={!!errors.primarySector}
-              helperText={errors.primarySector || "Select your startup's main sector"}
+              helperText={
+                errors.primarySector || "Select your startup's main sector"
+              }
             >
               <MenuItem value="HealthTech">HealthTech</MenuItem>
               <MenuItem value="FinTech">FinTech</MenuItem>
@@ -434,32 +549,66 @@ function App() {
               <MenuItem value="Blockchain">Blockchain</MenuItem>
               <MenuItem value="Other">Other</MenuItem>
             </TextField>
+
+            {/* NEW: Secondary Sector */}
+            <TextField
+              select
+              label="Secondary Sector"
+              value={formData.secondarySector}
+              onChange={handleInputChange("secondarySector")}
+              error={!!errors.secondarySector}
+              helperText={
+                errors.secondarySector || "Optional – select additional focus area"
+              }
+            >
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="HealthTech">HealthTech</MenuItem>
+              <MenuItem value="FinTech">FinTech</MenuItem>
+              <MenuItem value="EdTech">EdTech</MenuItem>
+              <MenuItem value="AgriTech">AgriTech</MenuItem>
+              <MenuItem value="E-Commerce">E-Commerce</MenuItem>
+              <MenuItem value="AI / ML">AI / ML</MenuItem>
+              <MenuItem value="IoT">IoT</MenuItem>
+              <MenuItem value="SaaS">SaaS</MenuItem>
+              <MenuItem value="Blockchain">Blockchain</MenuItem>
+              <MenuItem value="Other">Other</MenuItem>
+            </TextField>
+
             <TextField
               label="Company PAN *"
               value={formData.companyPAN}
-              onChange={handleInputChange('companyPAN')}
+              onChange={handleInputChange("companyPAN")}
               placeholder="ABCDE1234F"
               inputProps={{ maxLength: 10 }}
               error={!!errors.companyPAN}
-              helperText={errors.companyPAN }
+              helperText={errors.companyPAN}
             />
-            <TextField label="GSTIN / CIN" value={formData.gstin} onChange={handleInputChange('gstin')}  />
-            
+
+            <TextField
+              label="GSTIN / CIN"
+              value={formData.gstin}
+              onChange={handleInputChange("gstin")}
+            />
           </FormRow>
+
+          {/* ROW 3 */}
           <FormRow>
-            <TextField 
-              label="Current Team Size *" 
-              value={formData.currentTeamSize} 
-              onChange={handleInputChange('currentTeamSize')} 
-              placeholder="Excluding Founders" 
+            <TextField
+              label="Current Team Size *"
+              type="number"
+              value={formData.currentTeamSize}
+              onChange={handleInputChange("currentTeamSize")}
+              placeholder="Excluding Founders"
               error={!!errors.currentTeamSize}
               helperText={errors.currentTeamSize}
+              inputProps={{ min: 0 }}
             />
+
             <TextField
               label="Male Employees *"
               type="number"
               value={formData.maleCount}
-              onChange={handleInputChange('maleCount')}
+              onChange={handleInputChange("maleCount")}
               error={!!errors.maleCount}
               helperText={errors.maleCount}
               inputProps={{ min: 0 }}
@@ -469,28 +618,41 @@ function App() {
               label="Female Employees *"
               type="number"
               value={formData.femaleCount}
-              onChange={handleInputChange('femaleCount')}
+              onChange={handleInputChange("femaleCount")}
               error={!!errors.femaleCount}
               helperText={errors.femaleCount}
               inputProps={{ min: 0 }}
             />
           </FormRow>
 
+          {/* ROW 4 */}
           <FormRow>
-            <TextField label="Company Website" value={formData.companyWebsite} onChange={handleInputChange('companyWebsite')} placeholder="https://www.yourstartup.com" />
-            <TextField 
-                label="Number of Branches *" 
-                type="number"
-                value={formData.numberOfBranches} 
-                onChange={handleBranchCountChange} 
-                error={!!errors.numberOfBranches}
-                helperText={errors.numberOfBranches }
-                inputProps={{ min: 1 }}
+            <TextField
+              label="Company Website"
+              value={formData.companyWebsite}
+              onChange={handleInputChange("companyWebsite")}
+              placeholder="https://www.yourstartup.com"
             />
+
+            <TextField
+            label="Number of Branches *"
+            type="number"
+            value={formData.numberOfBranches}
+            onChange={handleBranchCountChange}
+            error={!!errors.numberOfBranches}
+            helperText={
+              errors.numberOfBranches || "Enter a value between 1 and 20"
+            }
+            inputProps={{
+              min: 1,
+              max: 20,
+            }}
+          />
+
           </FormRow>
-          
         </CardContent>
       </Card>
+
 
       {/* Dynamic Registered Office Address(es) based on Number of Branches */}
       {formData.branchAddresses.map((address, index) => {
