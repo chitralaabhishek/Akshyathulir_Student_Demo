@@ -61,6 +61,7 @@ const FormRow = ({ children }) => (
 
 function App() {
   // --- DATE CALCULATIONS ---
+  // 1. Get Today's Date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
 
   // 2. Get Date 2 Years Ago from Today
@@ -105,14 +106,15 @@ function App() {
     founderName: '',
     founderEmail: '',
     founderPhone: '',
-    founderDOB: '', 
-    founderGender: '',
+    founderDOB: '',
+    founderGender: '', 
     founderLinkedIn: '',
     founderFacebook: '', 
     fundingNeeded: '',
     mentorshipNeeded: '',
     technologySupport: '',
     incubationSpace: '',
+    registrationNeeded: '', // <--- NEW FIELD ADDED HERE
     supportInterest: '',
     governmentSchemes: '',
   });
@@ -260,30 +262,8 @@ function App() {
   };
 
   const handleCityChange = (index, event) => {
-    const selectedCity = event.target.value;
-
-    const selectedCityObj =
-      addressArrays[index]?.cities?.find(c => c.name === selectedCity);
-
-    const updatedAddresses = [...formData.branchAddresses];
-    updatedAddresses[index] = {
-      ...updatedAddresses[index],
-      city: selectedCity,
-      pinCode: selectedCityObj?.pin || ''
-    };
-
-    setFormData({ ...formData, branchAddresses: updatedAddresses });
-
-    // Clear errors if any
-    if (errors[`address_${index}_city`] || errors[`address_${index}_pinCode`]) {
-      setErrors({
-        ...errors,
-        [`address_${index}_city`]: '',
-        [`address_${index}_pinCode`]: ''
-      });
-    }
-  };
-
+      handleAddressFieldChange(index, 'city', event.target.value);
+  }
 
   // --- General Input Handler ---
   const handleInputChange = (field) => (event) => {
@@ -372,7 +352,9 @@ function App() {
       startupName: '', legalStatus: '', dateOfEstablishment: '', startupStage: '', primarySector: '', companyPAN: '', currentTeamSize: '', maleCount: '', femaleCount: '', gstin: '', companyWebsite: '', numberOfBranches: '1',
       branchAddresses: [{ ...initialAddress }],
       founderName: '', founderEmail: '', founderPhone: '', founderDOB: '', founderGender: '', founderLinkedIn: '', founderFacebook: '',
-      fundingNeeded: '', mentorshipNeeded: '', technologySupport: '', incubationSpace: '', supportInterest: '', governmentSchemes: ''
+      fundingNeeded: '', mentorshipNeeded: '', technologySupport: '', incubationSpace: '',
+      registrationNeeded: '', // <--- RESET NEW FIELD
+      supportInterest: '', governmentSchemes: ''
     });
     setErrors({});
     setAddressArrays({ 0: { states: [], districts: [], cities: [] } });
@@ -419,33 +401,15 @@ function App() {
               label="Date of Establishment *"
               type="date"
               value={formData.dateOfEstablishment}
+              onChange={handleInputChange('dateOfEstablishment')}
               InputLabelProps={{ shrink: true }}
-              onChange={(e) => {
-                const selectedDate = e.target.value;
-
-                if (selectedDate < twoYearsAgo || selectedDate > today) {
-                  setErrors((prev) => ({
-                    ...prev,
-                    dateOfEstablishment:
-                      "Startup must be established within the last 2 years",
-                  }));
-                  return; // 🚫 BLOCK INVALID DATE
-                }
-
-                setErrors((prev) => ({ ...prev, dateOfEstablishment: "" }));
-                setFormData({ ...formData, dateOfEstablishment: selectedDate });
-              }}
               error={!!errors.dateOfEstablishment}
-              helperText={
-                errors.dateOfEstablishment ||
-                `Allowed range: ${twoYearsAgo} to ${today}`
-              }
+              helperText={errors.dateOfEstablishment || "Must be within last 2 years"}
               inputProps={{
-                min: twoYearsAgo,
-                max: today,
+                max: today,         // Cannot be future
+                min: twoYearsAgo    // Cannot be older than 2 years
               }}
             />
-
             {/* -------------------------------------- */}
 
           </FormRow>
@@ -513,8 +477,6 @@ function App() {
           </FormRow>
 
           <FormRow>
-            
-            
             <TextField label="Company Website" value={formData.companyWebsite} onChange={handleInputChange('companyWebsite')} placeholder="https://www.yourstartup.com" />
             <TextField 
                 label="Number of Branches *" 
@@ -608,6 +570,7 @@ function App() {
                     )}
                 </FormRow>
 
+                
                 <FormRow>
                     <TextField 
                         label="Area / Locality" 
@@ -615,16 +578,12 @@ function App() {
                         onChange={(e) => handleAddressFieldChange(index, 'area', e.target.value)} 
                     />
                     <TextField 
-                      label="Pin Code *" 
-                      value={address.pinCode} 
-                      onChange={(e) => handleAddressFieldChange(index, 'pinCode', e.target.value)} 
-                      InputProps={{
-                        readOnly: address.country === 'India' && !!address.city
-                      }}
-                      error={!!errors[`address_${index}_pinCode`]}
-                      helperText={errors[`address_${index}_pinCode`]}
+                    label="Pin Code *" 
+                    value={address.pinCode} 
+                    onChange={(e) => handleAddressFieldChange(index, 'pinCode', e.target.value)} 
+                    error={!!errors[`address_${index}_pinCode`]}
+                    helperText={errors[`address_${index}_pinCode`]}
                     />
-
                 </FormRow>
 
                 <FormRow>
@@ -695,13 +654,6 @@ function App() {
             />
           </FormRow>
           <FormRow>
-            
-            
-            {/* --- UPDATED: DATE OF BIRTH --- */}
-
-
-          </FormRow>
-          <FormRow>
             <TextField
               label="Designation *"
               value={formData.designation}
@@ -760,6 +712,26 @@ function App() {
             />
             </FormRow>
 
+            
+            {/* ------------------------------------------- */}
+
+            {/* Social Profiles */}
+            <FormRow>
+            <TextField
+                label="Founder LinkedIn Profile"
+                value={formData.founderLinkedIn}
+                onChange={handleInputChange('founderLinkedIn')}
+                placeholder="https://linkedin.com/in/username"
+            />
+            
+            <TextField
+                label="Founder Facebook Profile"
+                value={formData.founderFacebook}
+                onChange={handleInputChange('founderFacebook')}
+                placeholder="https://facebook.com/username"
+            />
+            </FormRow>
+
             {/* --- NEW SECTION: Founder DOB and Gender --- */}
             <FormRow>
                 <TextField 
@@ -773,33 +745,15 @@ function App() {
                     inputProps={{ max: today }} 
                 />
 
-                <TextField
-                    label="Founder LinkedIn Profile"
-                    value={formData.founderLinkedIn}
-                    onChange={handleInputChange('founderLinkedIn')}
-                    placeholder="https://linkedin.com/in/username"
-                />
-            </FormRow>
-
-            {/* Social Profiles */}
-            <FormRow>
-            <TextField
-                label="Founder Facebook Profile"
-                value={formData.founderFacebook}
-                onChange={handleInputChange('founderFacebook')}
-                placeholder="https://facebook.com/username"
-            />
-
-            <FormControl component="fieldset" error={!!errors.founderGender} sx={{ minWidth: 250 }}>
-                <FormLabel component="legend" sx={{ fontSize: '14px' }}>Founder Gender *</FormLabel>
-                <RadioGroup row value={formData.founderGender} onChange={handleInputChange('founderGender')}>
-                    <FormControlLabel value="Male" control={<Radio />} label="Male" />
-                    <FormControlLabel value="Female" control={<Radio />} label="Female" />
-                    <FormControlLabel value="Others" control={<Radio />} label="Others" />
-                </RadioGroup>
-                {errors.founderGender && <FormHelperText>{errors.founderGender}</FormHelperText>}
-            </FormControl>
-
+                <FormControl component="fieldset" error={!!errors.founderGender} sx={{ minWidth: 250 }}>
+                    <FormLabel component="legend" sx={{ fontSize: '14px' }}>Founder Gender *</FormLabel>
+                    <RadioGroup row value={formData.founderGender} onChange={handleInputChange('founderGender')}>
+                        <FormControlLabel value="Male" control={<Radio />} label="Male" />
+                        <FormControlLabel value="Female" control={<Radio />} label="Female" />
+                        <FormControlLabel value="Others" control={<Radio />} label="Others" />
+                    </RadioGroup>
+                    {errors.founderGender && <FormHelperText>{errors.founderGender}</FormHelperText>}
+                </FormControl>
             </FormRow>
 
         </CardContent>
@@ -887,6 +841,23 @@ function App() {
                 <FormControlLabel value="No" control={<Radio />} label="No" />
                 </RadioGroup>
             </FormControl>
+
+            {/* --- NEW ADDITION START: Registration Needed --- */}
+            {/* FIX: Added gridColumn span 2 to align the subsequent text fields properly */}
+            <FormControl sx={{ gridColumn: { md: 'span 2' } }}>
+                <FormLabel sx={{ mb: 1, textAlign: 'left' }}>
+                    Registration Needed ?
+                </FormLabel>
+                <RadioGroup
+                row
+                value={formData.registrationNeeded}
+                onChange={handleInputChange('registrationNeeded')}
+                >
+                <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                <FormControlLabel value="No" control={<Radio />} label="No" />
+                </RadioGroup>
+            </FormControl>
+             {/* --- NEW ADDITION END --- */}
 
             {/* Internship support */}
             <TextField

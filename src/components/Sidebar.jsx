@@ -18,6 +18,7 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 
 export default function Sidebar({ open, setOpen }) {
   const navigate = useNavigate();
@@ -27,23 +28,58 @@ export default function Sidebar({ open, setOpen }) {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
       sx={{
-        width: open ? 250 : 60,
+        width: open ? 250 : 64,
         height: "100vh",
         bgcolor: "#1f4d3a",
         color: "white",
         position: "fixed",
-        transition: "width 0.3s ease",
+        left: 0,
+        top: 0,
+        display: "flex",
+        flexDirection: "column",
+        transition: "width 0.25s ease",
         overflowX: "hidden",
         zIndex: 1200,
       }}
     >
-      <Box sx={{ p: 2, textAlign: open ? "left" : "center" }}>
-        <Typography variant="h6" fontWeight="bold" noWrap>
-          {open ? "Startup Hub" : "SH"}
+      {/* LOGO */}
+      <Box
+        sx={{
+          height: 64,
+          px: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: open ? "flex-start" : "center",
+          gap: 1.5,
+        }}
+      >
+        {/* LOGO ICON (always visible) */}
+        <RocketLaunchIcon
+          sx={{
+            fontSize: 32,
+            color: "white",
+            transition: "transform 0.3s ease",
+          }}
+        />
+
+        {/* NAME (only when open) */}
+        <Typography
+          variant="h6"
+          fontWeight="bold"
+          noWrap
+          sx={{
+            opacity: open ? 1 : 0,
+            transition: "opacity 0.2s ease",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Startup
         </Typography>
       </Box>
 
-      <List>
+
+      {/* MENU */}
+      <List sx={{ flexGrow: 1 }}>
         <MenuItem open={open} icon={<DashboardIcon />} text="Dashboard" onClick={() => navigate("/")} />
         <MenuItem open={open} icon={<AccountCircleIcon />} text="Profile" onClick={() => navigate("/profile")} />
         <MenuItem open={open} icon={<TrendingUpIcon />} text="Fundraising Tracker" onClick={() => navigate("/fundraising")} />
@@ -55,7 +91,8 @@ export default function Sidebar({ open, setOpen }) {
         <MenuItem open={open} icon={<GavelIcon />} text="Legal Compliance" onClick={() => navigate("/legal")} />
       </List>
 
-      <Box sx={{ position: "absolute", bottom: 20, width: "100%" }}>
+      {/* LOGOUT */}
+      <Box sx={{ mb: 2 }}>
         <MenuItem open={open} icon={<LogoutIcon />} text="Logout" />
       </Box>
     </Box>
@@ -66,19 +103,32 @@ function MenuItem({ icon, text, onClick, open }) {
   return (
     <ListItemButton
       onClick={onClick}
-      sx={{ justifyContent: open ? "flex-start" : "center", px: 2 }}
+      sx={{
+        height: 48,
+        px: 2,
+        justifyContent: open ? "flex-start" : "center",
+        transition: "all 0.2s ease",
+      }}
     >
       <ListItemIcon
         sx={{
           color: "white",
           minWidth: 0,
-          mr: open ? 2 : "auto",
+          mr: open ? 2 : 0,
           justifyContent: "center",
         }}
       >
         {icon}
       </ListItemIcon>
-      {open && <ListItemText primary={text} />}
+
+      <ListItemText
+        primary={text}
+        sx={{
+          opacity: open ? 1 : 0,
+          whiteSpace: "nowrap",
+          transition: "opacity 0.2s ease",
+        }}
+      />
     </ListItemButton>
   );
 }

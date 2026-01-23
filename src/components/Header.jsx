@@ -14,6 +14,8 @@ export default function Header() {
         justifyContent: "space-between",
         alignItems: "center",
       }}
+
+       
     >
       <Typography variant="h5">Startup Dashboard</Typography>
       <Box>
