@@ -1,17 +1,16 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import DashboardLayout from "./components/DashboardLayout";
 
+// Pages
 import Dashboard from "./pages/Dashboard";
-import FundraisingTracker from "./pages/FundraisingTracker";
 import Profile from "./pages/Profile";
+import Schemes from "./pages/Schemes";
+import FundraisingTracker from "./pages/FundraisingTracker";
 import TeamManagement from "./pages/TeamManagement";
+import MyClients from "./pages/MyClients";
 import MilestoneTracking from "./pages/MilestoneTracking";
-import InvestorRelations from "./pages/InvestorRelations";
 import ProductRoadmap from "./pages/ProductRoadmap";
 import LegalCompliance from "./pages/LegalCompliance";
-import MyClients from "./pages/MyClients";
-import Schemes from "./pages/Schemes";
-
 
 import { DataProvider } from "./context/DataContext";
 
@@ -20,30 +19,11 @@ function App() {
     <DataProvider>
       <BrowserRouter>
         <Routes>
-          {/* Dashboard */}
           <Route
             path="/"
             element={
               <DashboardLayout>
                 <Dashboard />
-              </DashboardLayout>
-            }
-          />
-
-          <Route
-            path="/milestones"
-            element={
-              <DashboardLayout>
-                <MilestoneTracking />
-              </DashboardLayout>
-            }
-          />
-
-          <Route
-            path="/fundraising"
-            element={
-              <DashboardLayout>
-                <FundraisingTracker />
               </DashboardLayout>
             }
           />
@@ -58,6 +38,24 @@ function App() {
           />
 
           <Route
+            path="/schemes"
+            element={
+              <DashboardLayout>
+                <Schemes />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
+            path="/fundraising"
+            element={
+              <DashboardLayout>
+                <FundraisingTracker />
+              </DashboardLayout>
+            }
+          />
+
+          <Route
             path="/team"
             element={
               <DashboardLayout>
@@ -66,7 +64,6 @@ function App() {
             }
           />
 
-          {/* ✅ MY CLIENTS ROUTE */}
           <Route
             path="/clients"
             element={
@@ -77,10 +74,10 @@ function App() {
           />
 
           <Route
-            path="/investors"
+            path="/milestones"
             element={
               <DashboardLayout>
-                <InvestorRelations />
+                <MilestoneTracking />
               </DashboardLayout>
             }
           />
@@ -103,15 +100,15 @@ function App() {
             }
           />
 
+          {/* 404 FALLBACK */}
           <Route
-            path="/schemes"
+            path="*"
             element={
               <DashboardLayout>
-                <Schemes />
+                <h2>Page Not Found</h2>
               </DashboardLayout>
             }
           />
-
         </Routes>
       </BrowserRouter>
     </DataProvider>
