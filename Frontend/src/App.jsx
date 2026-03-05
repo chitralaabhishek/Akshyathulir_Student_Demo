@@ -12,11 +12,10 @@ import MilestoneTracking from "./pages/MilestoneTracking";
 import ProductRoadmap from "./pages/ProductRoadmap";
 import LegalCompliance from "./pages/LegalCompliance";
 
-import { DataProvider } from "./context/DataContext";
+
 
 function App() {
   return (
-    <DataProvider>
       <BrowserRouter>
         <Routes>
           <Route
@@ -111,7 +110,6 @@ function App() {
           />
         </Routes>
       </BrowserRouter>
-    </DataProvider>
   );
 }
 
