@@ -1,13 +1,27 @@
 from fastapi import FastAPI
-from routes import router
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+import os
+
+from routes import (
+    startups,
+    dashboard_routes,
+    team,
+    clients,
+    milestones,
+    roadmap,
+    legal,
+    fundraising,
+    schemes,
+    opportunities,
+    courses,
+)
 
 app = FastAPI()
 
-# define allowed origins
 origins = [
     "http://localhost:3000",
-    "http://localhost:5173",  # <--- ADD THIS (Vite's default port)
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
@@ -18,10 +32,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routes with the /api prefix
-app.include_router(router, prefix="/api", tags=["Project API"])
+app.include_router(startups.router,         prefix="/api", tags=["Startups"])
+app.include_router(dashboard_routes.router, prefix="/api", tags=["Dashboard"])
+app.include_router(team.router,             prefix="/api", tags=["Team"])
+app.include_router(clients.router,          prefix="/api", tags=["Clients"])
+app.include_router(milestones.router,       prefix="/api", tags=["Milestones"])
+app.include_router(roadmap.router,          prefix="/api", tags=["Roadmap"])
+app.include_router(legal.router,            prefix="/api", tags=["Legal"])
+app.include_router(fundraising.router,      prefix="/api", tags=["Fundraising"])
+app.include_router(schemes.router,          prefix="/api", tags=["Schemes"])
+app.include_router(opportunities.router,    prefix="/api", tags=["Opportunities"])
+app.include_router(courses.router,          prefix="/api", tags=["Courses"])
 
-# Fixes the "GET / 404 Not Found" error
+os.makedirs("uploads/logos", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+
 @app.get("/")
 def home():
     return {"message": "Server is running correctly!"}

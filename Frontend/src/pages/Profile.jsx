@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useEmail } from "../context/EmailContext";
 
 import axios from "axios";
 import {
@@ -71,6 +72,7 @@ const initialFormState = {
   firstName: "",
   lastName: "",
   email: "",
+  logo: "",
   linkedin: "",
   website: "",
   dateOfBirth: "",
@@ -174,6 +176,7 @@ function App() {
   }, []);
   // --- DATE CALCULATIONS ---
   const today = new Date().toISOString().split("T")[0];
+  const { updateEmail } = useEmail();
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState(initialFormState);
   const d = new Date();
@@ -241,7 +244,8 @@ function App() {
     setFormData(initialFormState);
     setErrors({});
     setIsEditMode(false);
-    setIsEditable(true);
+    setIsEditable(false);
+    setOriginalData(null);
   };
 
   const handleCancelEdit = () => {
@@ -275,13 +279,16 @@ function App() {
         );
 
         const data = response.data;
-        setIsEditMode(true); // record exists
-        setIsEditable(false); // initially view-only
+        setIsEditMode(true);   // record exists
+        setIsEditable(false);  // initially view-only
+        setOriginalData(data); // save original so Cancel Edit works
+        updateEmail(data.email); // ← set global active email
 
         setFormData((prev) => ({
           ...prev,
 
           // Personal
+          logo:       data.logo       || "",
           firstName: data.firstName || "",
           lastName: data.lastName || "",
           email: data.email || prev.email,
@@ -393,12 +400,14 @@ function App() {
 
         setErrors((prev) => ({ ...prev, email: "" }));
       } catch (error) {
-        setErrors((prev) => ({
-          ...prev,
-          email:
-            error.response?.status === 404
-
-        }));
+        if (error.response?.status === 404) {
+          // Email not found — new user, allow fresh submission
+          setIsEditMode(false);
+          setIsEditable(false);
+          setErrors((prev) => ({ ...prev, email: "" }));
+        } else {
+          setErrors((prev) => ({ ...prev, email: "Failed to check email." }));
+        }
       } finally {
         setIsLoading((prev) => ({ ...prev, email: false }));
       }
@@ -745,21 +754,43 @@ function App() {
     setErrors(tempErrors);
     return isValid;
   };
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const email = formData.email || localStorage.getItem("userEmail");
+    if (!email) { alert("Please enter your email first."); return; }
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+    try {
+      const res = await Api.post(`/startup/upload-logo/${encodeURIComponent(email)}`, formDataUpload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setFormData((prev) => ({ ...prev, logo: res.data.logo }));
+    } catch (err) {
+      alert("Logo upload failed. Please try again.");
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) {
-      alert("Please correct errors before submitting.");
+      // Scroll to the first red field so user knows what to fix
+      setTimeout(() => {
+        const firstError = document.querySelector(".Mui-error");
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+      alert("Please fill in all required fields highlighted in red.");
       return;
     }
 
     try {
-      // FIX: Send phone and code separately. Do NOT combine them.
       const payload = {
         ...formData,
-        // Ensure numbers are integers for the backend
-        currentTeamSize: parseInt(formData.currentTeamSize) || 0,
+        currentTeamSize:  parseInt(formData.currentTeamSize)  || 0,
         numberOfBranches: parseInt(formData.numberOfBranches) || 1,
-        maleCount: parseInt(formData.maleCount) || 0,
-        femaleCount: parseInt(formData.femaleCount) || 0,
+        maleCount:        parseInt(formData.maleCount)        || 0,
+        femaleCount:      parseInt(formData.femaleCount)      || 0,
       };
 
       const response = isEditMode
@@ -768,15 +799,17 @@ function App() {
 
       if (response.status === 200 || response.status === 201) {
         localStorage.setItem("userEmail", formData.email);
-
+        updateEmail(formData.email); // ← set global active email
         alert(isEditMode ? "Updated successfully!" : "Submitted successfully!");
-
-        // RELOAD THE PAGE to see changes
         window.location.reload();
       }
     } catch (error) {
       console.error(error);
-      alert("Server error. Please try again.");
+      if (error.response?.status === 400) {
+        alert("A profile with this email already exists. Use the Edit button to update.");
+      } else {
+        alert("Server error. Please make sure your backend is running on port 8000.");
+      }
     }
   };
 
@@ -829,6 +862,35 @@ function App() {
             </Typography>
           </Box>
           <CardContent sx={{ p: 3 }}>
+            {/* LOGO UPLOAD */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 3 }}>
+              <Box
+                component="label"
+                sx={{
+                  cursor: (isEditMode && !isEditable) ? "default" : "pointer",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
+                }}
+              >
+                <Box
+                  component="img"
+                  src={formData.logo ? `http://127.0.0.1:8000/${formData.logo}` : "/default-logo.png"}
+                  alt="Startup Logo"
+                  sx={{
+                    width: 90, height: 90, borderRadius: 2,
+                    objectFit: "cover", border: "2px solid #1f4d3a",
+                    transition: "0.2s",
+                    "&:hover": { opacity: (isEditMode && !isEditable) ? 1 : 0.75 },
+                  }}
+                />
+                <input type="file" hidden accept="image/*"
+                  onChange={handleLogoUpload}
+                  disabled={isEditMode && !isEditable} />
+                <Typography variant="body2" color="text.secondary">
+                  Click logo to upload / change
+                </Typography>
+              </Box>
+            </Box>
+
             <FormRow>
               <TextField
                 label="CIN (Corporate Identification Number)"
@@ -1735,18 +1797,13 @@ function App() {
                             checked={formData.trainingType.includes(option)}
                             disabled={isEditMode && !isEditable}
                             onChange={(e) => {
-                              const sel = phoneCountries.find(
-                                (c) => c.name === e.target.value
-                              );
-
-                              if (sel) {
-                                setFormData((p) => ({
-                                  ...p,
-                                  founderPhoneCountry: sel.name,
-                                  founderPhoneCode: sel.dialCode,
-                                  founderPhone: "",
-                                }));
-                              }
+                              const checked = e.target.checked;
+                              setFormData((p) => ({
+                                ...p,
+                                trainingType: checked
+                                  ? [...p.trainingType, option]
+                                  : p.trainingType.filter((t) => t !== option),
+                              }));
                             }}
                           />
                         }
@@ -1974,7 +2031,7 @@ function App() {
             onClick={handleSubmit}
             disabled={isEditMode && !isEditable}
           >
-            {isEditMode ? "Update" : "Submit"}
+            {isEditMode ? "Update" : "Add Details"}
           </Button>
         </Box>
       </Container>

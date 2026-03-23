@@ -1,16 +1,28 @@
-# React + Vite
+# Akshaya Thulir - Startup Management Module
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📌 Project Overview
+This module is part of the Akshaya Thulir Section 8 Company website.
+It includes the Startup Registration, Dashboard, My Clients, and Milestone Tracking modules.
 
-Currently, two official plugins are available:
+## 🚀 Technologies Used
+- React.js
+- Material UI (MUI)
+- Bootstrap
+- Vite
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📊 Modules Implemented
+- Startup Registration Form
+- Dashboard (KPI & Charts)
+- My Clients Management
+- Milestone Tracking
 
-## React Compiler
+## ⚙️ Features
+- Dynamic UI updates
+- Add / Edit / Delete operations
+- Progress tracking
+- Responsive design
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🔮 Future Scope
+- Backend integration (Node.js + MongoDB)
+- Authentication system
+- Real-time analytics

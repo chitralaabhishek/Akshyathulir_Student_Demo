@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useEmail } from "../context/EmailContext";
 
 // Icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -20,9 +21,17 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import DescriptionIcon from "@mui/icons-material/Description";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 export default function Sidebar({ open, setOpen }) {
   const navigate = useNavigate();
+  const { updateEmail } = useEmail();
+
+  const handleLogout = () => {
+    updateEmail("");
+    navigate("/profile");
+  };
 
   return (
     <Box
@@ -76,11 +85,14 @@ export default function Sidebar({ open, setOpen }) {
         <MenuItem icon={<TimelineIcon />} text="Milestone Tracking" open={open} onClick={() => navigate("/milestones")} />
         <MenuItem icon={<HelpOutlineIcon />} text="Product Roadmap" open={open} onClick={() => navigate("/roadmap")} />
         <MenuItem icon={<GavelIcon />} text="Legal Compliance" open={open} onClick={() => navigate("/legal")} />
+        <MenuItem icon={<EmojiEventsIcon />} text="Opportunities" open={open} onClick={() => navigate("/opportunities")} />
+
+        <MenuItem icon={<MenuBookIcon />} text="Courses" open={open} onClick={() => navigate("/courses")} />
       </List>
 
       {/* LOGOUT */}
       <Box sx={{ mb: 2 }}>
-        <MenuItem icon={<LogoutIcon />} text="Logout" open={open} />
+        <MenuItem icon={<LogoutIcon />} text="Logout" open={open} onClick={handleLogout} />
       </Box>
     </Box>
   );

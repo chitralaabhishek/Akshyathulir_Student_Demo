@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\chitr\Documents\GitHub\Akshyathulir_Student_Demo\Backend\venv"
+VIRTUAL_ENV="C:\Users\chitr\Desktop\Start_dash\startup-dashboard\Backend\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
